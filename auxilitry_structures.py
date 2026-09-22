@@ -41,6 +41,6 @@ class Block:
 
     def from_bytes(self, data: bytes) -> None:
         """Десериализация. Преобразует в 64-битные числа"""
-        if(len(data) !=  WORDS_IN_BLOCK):
+        if(len(data) !=  1024):
             raise ValueError("Был передан ошибочный поток байтов: длинна данных должна быть %d байт." % WORDS_IN_BLOCK)
         self.v = list(struct.unpack(f"<{WORDS_IN_BLOCK}Q", data))
