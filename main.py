@@ -1,6 +1,8 @@
 import os
 import struct
 import hashlib
+import random
+import string
 from dotenv import load_dotenv
 
 
@@ -124,7 +126,26 @@ class Argon2id:
         final_bytes = final_block.to_bytes()
         final_hash_bytes = self._blake2b_long(final_bytes, self.context.hash_length)
 
-        return final_hash_bytes.hex()
+        upper = string.ascii_uppercase
+        lower = string.ascii_lowercase
+        digits = string.digits
+        specials = "$&#%^*!@_"
+
+        rng = random.Random(final_hash_bytes)
+
+        password_chars = [
+            rng.choice(upper),
+            rng.choice(lower),
+            rng.choice(digits),
+            rng.choice(specials)
+        ]
+
+        all_allowed_chars = upper + lower + digits + specials
+        password_chars += rng.choices(all_allowed_chars, k=8)
+
+        rng.shuffle(password_chars)
+
+        return "".join(password_chars)
 
 
     def _blake2b_long(self, input_data:bytes, output_len:int) -> bytes:
@@ -148,7 +169,7 @@ class Argon2id:
 
 
 if __name__ == "__main__":
-    config = Argon2Context(time_cost=2, memory_cost=1024, lanes=1, hash_length=6)
+    config = Argon2Context(time_cost=2, memory_cost=1024, lanes=1, hash_length=9)
     hasher = Argon2id(config)
     result = hasher.hash(password=PASSWORD.encode('utf-8'), salt=SALT.encode('utf-8'))
     print(result)
